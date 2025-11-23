@@ -1,11 +1,296 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <h1>Hello World</h1>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bitty的飞翔之旅</title>
+    <style>
+        /* --- 基础设置 & Apple风格字体 --- */
+        :root {
+            --sky-day-top: #e0f7fa;
+            --sky-day-bottom: #87ceeb;
+            --sky-night-top: #0f2027;
+            --sky-night-bottom: #203a43;
+            --ocean-day: #006994;
+            --ocean-night: #001f3f;
+            --text-color: #ffffff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        /* --- 背景容器 (天空) --- */
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: background 2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 日间模式 */
+        .day-mode {
+            background: linear-gradient(to bottom, var(--sky-day-top), var(--sky-day-bottom));
+        }
+
+        /* 夜间模式 */
+        .night-mode {
+            background: linear-gradient(to bottom, var(--sky-night-top), var(--sky-night-bottom));
+        }
+
+        /* --- 太阳 / 月亮 --- */
+        .celestial-body {
+            position: absolute;
+            top: 50px;
+            right: 40px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            transition: all 1.5s ease-in-out;
+            z-index: 10;
+        }
+
+        /* 太阳样式 */
+        .day-mode .celestial-body {
+            background: #FFD700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+        }
+
+        /* 月亮样式 */
+        .night-mode .celestial-body {
+            background: transparent;
+            box-shadow: -15px 15px 0 5px #fdfbf7; /*通过阴影制作月牙形状*/
+            transform: rotate(-20deg) translate(10px, -10px);
+        }
+
+        /* --- 云朵动画 --- */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            z-index: 5;
+            animation: moveLeft linear infinite;
+        }
+
+        .cloud::after, .cloud::before {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        /* 各种云朵形状微调 */
+        .c1 { width: 100px; height: 40px; top: 15%; left: 100%; animation-duration: 25s; opacity: 0.9; }
+        .c1::after { width: 50px; height: 50px; top: -25px; left: 15px; }
+        .c1::before { width: 40px; height: 40px; top: -15px; left: 45px; }
+
+        .c2 { width: 80px; height: 30px; top: 30%; left: 110%; animation-duration: 18s; opacity: 0.7; transform: scale(0.8); }
+        .c2::after { width: 40px; height: 40px; top: -20px; left: 10px; }
+
+        .c3 { width: 120px; height: 50px; top: 10%; left: 120%; animation-duration: 30s; opacity: 0.6; transform: scale(1.2); }
+        .c3::after { width: 60px; height: 60px; top: -30px; left: 20px; }
+        .c3::before { width: 50px; height: 50px; top: -20px; left: 55px; }
+
+        @keyframes moveLeft {
+            0% { transform: translateX(0vw); }
+            100% { transform: translateX(-150vw); }
+        }
+
+        /* --- 飞鸟 --- */
+        .bird-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            animation: bobbing 2s ease-in-out infinite;
+        }
+
+        /* SVG 鸟 */
+        .bird-svg {
+            width: 100px;
+            height: auto;
+            fill: #333; /* 默认深色 */
+            transition: fill 1s;
+        }
+
+        .night-mode .bird-svg {
+            fill: #eee; /* 夜间变白 */
+        }
+
+        @keyframes bobbing {
+            0%, 100% { transform: translate(-50%, -50%); }
+            50% { transform: translate(-50%, -65%); } /* 向上浮动 */
+        }
+
+        /* --- 海洋 --- */
+        .ocean {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 25vh; /* 占据底部 */
+            background: var(--ocean-day);
+            z-index: 15;
+            transition: background 2s;
+            overflow: hidden;
+        }
+
+        .night-mode .ocean {
+            background: var(--ocean-night);
+        }
+
+        /* 波浪 SVG 动画 */
+        .wave {
+            position: absolute;
+            top: -40px; /* 让波浪骑在ocean div的边缘 */
+            width: 200%;
+            height: 60px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23ffffff'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            background-size: 50% 100%;
+            animation: waveMove 6s linear infinite;
+            opacity: 0.3;
+        }
+
+        .wave:nth-of-type(2) {
+            top: -30px;
+            animation: waveMove 8s linear infinite reverse;
+            opacity: 0.2;
+        }
+
+        /* 配合暗黑模式调整波浪颜色 (SVG 是白色的，这里用CSS滤镜或opacity处理) */
+        .day-mode .wave { opacity: 0.3; }
+        .night-mode .wave { opacity: 0.1; }
+
+        @keyframes waveMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* --- 文字信息 --- */
+        .info-container {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+            z-index: 30;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .timer-text {
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: inline-block;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .timer-highlight {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums; /* 防止数字跳动 */
+        }
+
+    </style>
 </head>
 <body>
+
+<div id="app" class="day-mode">
+    <div class="celestial-body"></div>
+
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+
+    <div class="bird-container">
+        <svg class="bird-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+           <path d="M468.5,226.8c-6.3-2.3-41-14.6-73.4-14.6c-40.3,0-70.4,18.5-81.5,26.6c-10.8,7.9-32.3,14.8-53,14.8c-14.3,0-27.4-3.2-35.2-7.1
+            c-17.5-8.7-28.2-18.5-32.6-23c-15.4-15.8-24.9-32.2-32.6-45.4c-1.8-3-3.5-5.9-5.2-8.7c-2.9-4.6-32-48.4-64.7-48.4
+            c-34.8,0-49.3,32.4-51.2,37c-4,9.6-4.9,22.5,2,33.7c12.7,20.7,40.1,41.9,47.9,47.7c-2.9,1.1-5.9,2.2-8.8,3.5
+            c-28.7,12.5-42.5,36.8-42.5,37.2c0,0.3-0.1,0.6-0.1,0.9c0,18.6,15,34.5,34.3,36.3c1.8,0.2,3.6,0.3,5.4,0.3
+            c19.3,0,38.1-8.6,51.5-23.5c6.4-7.1,11.6-14.6,16.1-21.9c12.7,4.3,26.6,6.6,41.1,6.6c18.7,0,41.2-3.9,60.6-10.6
+            c34.9-12,72.1-10.8,110.7-9.5c10.4,0.3,20.8,0.7,31.2,0.7c28.4,0,62.3-2.9,82.4-15.8C477.9,242.3,475.6,229.4,468.5,226.8z"/>
+        </svg>
+    </div>
+
+    <div class="ocean">
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <div class="info-container">
+        <div class="timer-text" id="timer">计算中...</div>
+    </div>
+</div>
+
+<script>
+    // 1. 日期配置: 2011年2月16日
+    const START_DATE = new Date('2011-02-16T00:00:00');
+
+    const timerElement = document.getElementById('timer');
+    const appElement = document.getElementById('app');
+
+    // 2. 倒计时更新逻辑
+    function updateTimer() {
+        const now = new Date();
+
+        // 计算总毫秒差
+        const diff = now - START_DATE;
+
+        // 换算单位
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        // 渲染文字
+        timerElement.innerHTML = `今天是Bitty飞翔的 <span class="timer-highlight">${days}</span> 天 <span class="timer-highlight">${hours}</span> 小时 <span class="timer-highlight">${minutes}</span> 分 <span class="timer-highlight">${seconds}</span> 秒`;
+    }
+
+    // 3. 日夜切换逻辑 (基于GMT+8 北京时间)
+    function checkDayNight() {
+        // 获取当前北京时间的时间对象
+        const now = new Date();
+        // 转换为北京时间字符串来判断小时
+        const beijingTimeStr = now.toLocaleString("en-US", {timeZone: "Asia/Shanghai"});
+        const beijingDate = new Date(beijingTimeStr);
+        const currentHour = beijingDate.getHours();
+
+        // 假设 6:00 - 18:00 为白天
+        if (currentHour >= 6 && currentHour < 18) {
+            if (appElement.classList.contains('night-mode')) {
+                appElement.classList.remove('night-mode');
+                appElement.classList.add('day-mode');
+            }
+        } else {
+            if (appElement.classList.contains('day-mode')) {
+                appElement.classList.remove('day-mode');
+                appElement.classList.add('night-mode');
+            }
+        }
+    }
+
+    // 初始化
+    setInterval(updateTimer, 1000); // 每秒刷新时间
+    setInterval(checkDayNight, 60000); // 每分钟检查一次日夜模式
+
+    updateTimer();
+    checkDayNight();
+
+</script>
 
 </body>
 </html>
