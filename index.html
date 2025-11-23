@@ -317,7 +317,7 @@
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        timerElement.innerHTML = `今天是Bitty和伙伴飞翔的<br><span class="timer-highlight">${days}</span> 天 <span class="timer-highlight">${String(hours).padStart(2, '0')}</span> 小时 <span class="timer-highlight">${String(minutes).padStart(2, '0')}</span> 分 <span class="timer-highlight">${String(seconds).padStart(2, '0')}</span> 秒`;
+        timerElement.innerHTML = `今天是Bitty飞翔的<br><span class="timer-highlight">${days}</span> 天 <span class="timer-highlight">${String(hours).padStart(2, '0')}</span> 小时 <span class="timer-highlight">${String(minutes).padStart(2, '0')}</span> 分 <span class="timer-highlight">${String(seconds).padStart(2, '0')}</span> 秒`;
     }
 
     function updateEnvironment() {

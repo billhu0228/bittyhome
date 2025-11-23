@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>双飞小鸟 - 仅保留躯干</title>
+  <style>
+    :root{--bg:#eaf6ff;--bird-body:#2b6cb0;--beak:#ffb020}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:linear-gradient(180deg,var(--bg),#ffffff);display:flex;align-items:center;justify-content:center}
+    .scene{width:100%;max-width:900px;height:420px;position:relative;overflow:hidden}
+
+    /* 小鸟容器：保留定位和缩放 */
+    .bird{position:absolute;width:160px;height:120px;transform-origin:center center}
+    .bird.bird-1{left:18%;top:45%;transform:scale(0.85)}
+    .bird.bird-2{right:18%;top:30%;transform:scale(1.05) rotate(-6deg)}
+
+    /* 保留整体上下漂浮效果，让它们看起来还在空中，不至于像死板的贴图 */
+    @keyframes floatY{
+      0%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+      100%{transform:translateY(0)}
+    }
+    .bird{animation:floatY 3.6s ease-in-out infinite}
+
+    /* 代码显示小提示 */
+    .caption{position:absolute;left:12px;bottom:12px;font-size:13px;color:#334155;background:rgba(255,255,255,0.7);padding:8px 10px;border-radius:8px}
+
+    /* 适配小屏 */
+    @media (max-width:520px){
+      .scene{height:320px}
+      .bird{width:120px;height:90px}
+    }
+  </style>
+</head>
+<body>
+  <div class="scene" aria-label="小鸟 - 仅身头嘴">
+
+    <div class="bird bird-1" role="img" aria-label="小鸟一">
+      <svg viewBox="0 0 160 120" width="160" height="120" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(16,12)">
+          <ellipse cx="60" cy="52" rx="38" ry="28" fill="var(--bird-body)" />
+
+          <circle cx="98" cy="40" r="18" fill="var(--bird-body)" />
+
+          <circle cx="104" cy="36" r="3" fill="#fff" />
+          <circle cx="105" cy="36" r="1.2" fill="#000" />
+
+          <path d="M116 44 L130 40 L116 36 Z" fill="var(--beak)" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="bird bird-2" role="img" aria-label="小鸟二">
+      <svg viewBox="0 0 160 120" width="160" height="120" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(12,8)">
+          <ellipse cx="60" cy="52" rx="38" ry="28" fill="var(--bird-body)" />
+
+          <circle cx="98" cy="40" r="18" fill="var(--bird-body)" />
+
+          <circle cx="104" cy="36" r="3" fill="#fff" />
+          <circle cx="105" cy="36" r="1.2" fill="#000" />
+
+          <path d="M116 44 L130 40 L116 36 Z" fill="var(--beak)" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="caption">仅保留：身体、头、嘴</div>
+  </div>
+</body>
+</html>
