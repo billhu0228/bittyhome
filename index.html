@@ -3,17 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bitty的飞翔之旅</title>
+    <title>Bitty's Love</title>
     <style>
-        /* --- 基础设置 & Apple风格字体 --- */
+        /* --- 基础设置 --- */
         :root {
-            --sky-day-top: #e0f7fa;
-            --sky-day-bottom: #87ceeb;
-            --sky-night-top: #0f2027;
-            --sky-night-bottom: #203a43;
-            --ocean-day: #006994;
-            --ocean-night: #001f3f;
+            /* 天空颜色 */
+            --sky-day-top: #e3f2fd;
+            --sky-day-bottom: #90caf9;
+            --sky-night-top: #09121d;
+            --sky-night-bottom: #16233a;
+
+            /* 海洋颜色 - 卡通分层风格 */
+            /* 日间 */
+            --ocean-wave-back: #00899b;   /* 后排深色 */
+            --ocean-wave-mid: #00bcd4;    /* 中间色 */
+            --ocean-wave-front: #4dd0e1;  /* 前排浅色 */
+            --ocean-bg-day: #006064;      /* 底部填充 */
+
+            /* 夜间 */
+            --ocean-wave-back-night: #0d47a1;
+            --ocean-wave-mid-night: #1565c0;
+            --ocean-wave-front-night: #1e88e5;
+            --ocean-bg-night: #0a3d91;
+
+            /* 鸟的颜色 */
+            --bird-color-day: #37474f;
+            --bird-color-night: #b0bec5;
+
             --text-color: #ffffff;
+            --celestial-angle: -90deg;
         }
 
         body, html {
@@ -22,255 +40,304 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--sky-day-top);
         }
 
-        /* --- 背景容器 (天空) --- */
         #app {
             position: relative;
             width: 100%;
             height: 100%;
-            transition: background 2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            transition: background 3s ease;
+            overflow: hidden;
         }
 
-        /* 日间模式 */
-        .day-mode {
-            background: linear-gradient(to bottom, var(--sky-day-top), var(--sky-day-bottom));
+        .day-mode { background: linear-gradient(180deg, var(--sky-day-top) 0%, var(--sky-day-bottom) 100%); }
+        .night-mode { background: linear-gradient(180deg, var(--sky-night-top) 0%, var(--sky-night-bottom) 100%); }
+
+        /* --- 1. 天体轨道系统 --- */
+        .celestial-orbit-container {
+            position: absolute;
+            bottom: -50vh;
+            left: 50%;
+            width: 150vmax;
+            height: 150vmax;
+            transform-origin: center center;
+            transform: translate(-50%, 50%) rotate(var(--celestial-angle));
+            z-index: 10;
+            pointer-events: none;
+            transition: transform 1s linear;
         }
 
-        /* 夜间模式 */
-        .night-mode {
-            background: linear-gradient(to bottom, var(--sky-night-top), var(--sky-night-bottom));
-        }
-
-        /* --- 太阳 / 月亮 --- */
         .celestial-body {
             position: absolute;
-            top: 50px;
-            right: 40px;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 80px;
             height: 80px;
-            border-radius: 50%;
-            transition: all 1.5s ease-in-out;
-            z-index: 10;
         }
 
-        /* 太阳样式 */
-        .day-mode .celestial-body {
-            background: #FFD700;
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+        .celestial-body-inner {
+             width: 100%;
+             height: 100%;
+             border-radius: 50%;
+             transform: rotate(calc(var(--celestial-angle) * -1));
+             transition: all 2s ease;
         }
 
-        /* 月亮样式 */
-        .night-mode .celestial-body {
+        .day-mode .celestial-body-inner {
+            background: #fdd835;
+            box-shadow: 0 0 50px rgba(253, 216, 53, 0.6);
+        }
+        .night-mode .celestial-body-inner {
             background: transparent;
-            box-shadow: -15px 15px 0 5px #fdfbf7; /*通过阴影制作月牙形状*/
-            transform: rotate(-20deg) translate(10px, -10px);
+            box-shadow: -15px 15px 0 2px #fff9c4;
+            transform: rotate(calc(var(--celestial-angle) * -1 - 25deg)) scale(0.9);
         }
 
-        /* --- 云朵动画 --- */
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50px;
-            z-index: 5;
-            animation: moveLeft linear infinite;
-        }
+        /* --- 云朵 --- */
+        .clouds-container { position: absolute; width: 100%; height: 60%; z-index: 5; pointer-events: none;}
+        .cloud { position: absolute; background: rgba(255, 255, 255, 0.8); border-radius: 50px; animation: moveLeft linear infinite; }
+        .cloud::after, .cloud::before { content: ''; position: absolute; background: inherit; border-radius: 50%; }
+        .c1 { width: 110px; height: 45px; top: 18%; left: 100%; animation-duration: 35s; opacity: 0.9; }
+        .c1::after { width: 55px; height: 55px; top: -25px; left: 15px; } .c1::before { width: 45px; height: 45px; top: -18px; left: 50px; }
+        .c2 { width: 90px; height: 35px; top: 35%; left: 115%; animation-duration: 25s; opacity: 0.7; transform: scale(0.8); }
+        .c2::after { width: 45px; height: 45px; top: -22px; left: 12px; }
+        .c3 { width: 130px; height: 55px; top: 12%; left: 130%; animation-duration: 45s; opacity: 0.5; transform: scale(1.2); }
+        .c3::after { width: 70px; height: 70px; top: -35px; left: 25px; } .c3::before { width: 60px; height: 60px; top: -25px; left: 60px; }
+        @keyframes moveLeft { 100% { transform: translateX(-180vw); } }
 
-        .cloud::after, .cloud::before {
-            content: '';
-            position: absolute;
-            background: inherit;
-            border-radius: 50%;
-        }
-
-        /* 各种云朵形状微调 */
-        .c1 { width: 100px; height: 40px; top: 15%; left: 100%; animation-duration: 25s; opacity: 0.9; }
-        .c1::after { width: 50px; height: 50px; top: -25px; left: 15px; }
-        .c1::before { width: 40px; height: 40px; top: -15px; left: 45px; }
-
-        .c2 { width: 80px; height: 30px; top: 30%; left: 110%; animation-duration: 18s; opacity: 0.7; transform: scale(0.8); }
-        .c2::after { width: 40px; height: 40px; top: -20px; left: 10px; }
-
-        .c3 { width: 120px; height: 50px; top: 10%; left: 120%; animation-duration: 30s; opacity: 0.6; transform: scale(1.2); }
-        .c3::after { width: 60px; height: 60px; top: -30px; left: 20px; }
-        .c3::before { width: 50px; height: 50px; top: -20px; left: 55px; }
-
-        @keyframes moveLeft {
-            0% { transform: translateX(0vw); }
-            100% { transform: translateX(-150vw); }
-        }
-
-        /* --- 飞鸟 --- */
+        /* --- 2. 双鸟比翼双飞 --- */
         .bird-container {
             position: absolute;
             top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 20;
-            animation: bobbing 2s ease-in-out infinite;
+            animation: group-glide 5s ease-in-out infinite;
         }
 
-        /* SVG 鸟 */
         .bird-svg {
-            width: 100px;
+            position: absolute;
             height: auto;
-            fill: #333; /* 默认深色 */
-            transition: fill 1s;
+            transition: fill 3s;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+            overflow: visible;
         }
 
-        .night-mode .bird-svg {
-            fill: #eee; /* 夜间变白 */
+        .day-mode .bird-shape { fill: var(--bird-color-day); }
+        .night-mode .bird-shape { fill: var(--bird-color-night); }
+
+        .bird-large { width: 80px; top: 0; left: 0; z-index: 2; }
+        .bird-small { width: 50px; top: 20px; left: -45px; z-index: 1; opacity: 0.95; animation: sub-glide 5s ease-in-out infinite -0.8s; }
+
+        @keyframes group-glide {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) translateY(-15px) rotate(1.5deg); }
+        }
+        @keyframes sub-glide {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(8px) rotate(-1deg); }
         }
 
-        @keyframes bobbing {
-            0%, 100% { transform: translate(-50%, -50%); }
-            50% { transform: translate(-50%, -65%); } /* 向上浮动 */
+        /* --- 3. 无缝卡通海浪 (核心修改) --- */
+        .ocean-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40vh; /* 增加波浪区域高度 */
+            z-index: 15;
+            overflow: hidden;
+            pointer-events: none;
         }
 
-        /* --- 海洋 --- */
-        .ocean {
+        /* 填充底部的颜色块，防止波浪起伏时露出背景 */
+        .ocean-base {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20vh;
+            background-color: var(--ocean-bg-day);
+            transition: background-color 3s ease;
+            z-index: 0;
+        }
+        .night-mode .ocean-base { background-color: var(--ocean-bg-night); }
+
+        .waves-container {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: 25vh; /* 占据底部 */
-            background: var(--ocean-day);
-            z-index: 15;
-            transition: background 2s;
-            overflow: hidden;
+            height: 100%;
+            z-index: 1;
         }
 
-        .night-mode .ocean {
-            background: var(--ocean-night);
-        }
-
-        /* 波浪 SVG 动画 */
         .wave {
             position: absolute;
-            top: -40px; /* 让波浪骑在ocean div的边缘 */
-            width: 200%;
-            height: 60px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23ffffff'/%3E%3C/svg%3E");
+            left: 0;
+            width: 200%; /* 关键：宽度为200%，包含两个完整的波浪周期 */
             background-repeat: repeat-x;
-            background-size: 50% 100%;
-            animation: waveMove 6s linear infinite;
-            opacity: 0.3;
+            background-position: 0 bottom;
+            transition: background-color 3s ease;
+            /* 使用Mask来实现波浪形状，方便通过背景色改变颜色 */
+            -webkit-mask-repeat: repeat-x;
+            mask-repeat: repeat-x;
+            /* 修正Mask尺寸：50% 100% 意味着在200%的宽度里重复两次，刚好接上 */
+            -webkit-mask-size: 50% 100%;
+            mask-size: 50% 100%;
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300' preserveAspectRatio='none'%3E%3Cpath d='M0,100 C250,200 500,0 750,100 S1000,100 1000,100 V300 H0 Z' fill='black'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300' preserveAspectRatio='none'%3E%3Cpath d='M0,100 C250,200 500,0 750,100 S1000,100 1000,100 V300 H0 Z' fill='black'/%3E%3C/svg%3E");
         }
 
-        .wave:nth-of-type(2) {
-            top: -30px;
-            animation: waveMove 8s linear infinite reverse;
-            opacity: 0.2;
-        }
-
-        /* 配合暗黑模式调整波浪颜色 (SVG 是白色的，这里用CSS滤镜或opacity处理) */
-        .day-mode .wave { opacity: 0.3; }
-        .night-mode .wave { opacity: 0.1; }
-
-        @keyframes waveMove {
+        /* 统一的流动动画：从 0% 移动到 -50% (即移动半个身位，刚好回到原点形状) */
+        @keyframes wave-scroll {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
 
+        /* 后排波浪 */
+        .wave-back {
+            bottom: 12vh;
+            height: 20vh;
+            z-index: 1;
+            opacity: 1;
+            background-color: var(--ocean-wave-back);
+            animation: wave-scroll 25s linear infinite;
+        }
+        .night-mode .wave-back { background-color: var(--ocean-wave-back-night); }
+
+        /* 中间波浪 */
+        .wave-mid {
+            bottom: 6vh;
+            height: 22vh;
+            z-index: 2;
+            opacity: 1;
+            background-color: var(--ocean-wave-mid);
+            /* 反向流动增加层次感，但要处理好起始点，这里使用正向但不同速度更稳妥 */
+            animation: wave-scroll 18s linear infinite;
+            /* 稍微错位 */
+            left: -20px;
+        }
+        .night-mode .wave-mid { background-color: var(--ocean-wave-mid-night); }
+
+        /* 前排波浪 */
+        .wave-front {
+            bottom: -2vh;
+            height: 25vh;
+            z-index: 3;
+            opacity: 1;
+            background-color: var(--ocean-wave-front);
+            animation: wave-scroll 10s linear infinite;
+        }
+        .night-mode .wave-front { background-color: var(--ocean-wave-front-night); }
+
+
         /* --- 文字信息 --- */
         .info-container {
             position: absolute;
-            bottom: 40px;
+            bottom: 12vh;
             width: 100%;
             text-align: center;
             z-index: 30;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .timer-text {
-            font-size: 14px;
-            font-weight: 400;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
+        .timer-box {
             display: inline-block;
-            background: rgba(0,0,0,0.2);
-            padding: 10px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 14px 28px;
+            border-radius: 40px;
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
 
-        .timer-highlight {
-            font-weight: 600;
-            font-variant-numeric: tabular-nums; /* 防止数字跳动 */
-        }
+        .timer-text { font-size: 15px; font-weight: 500; letter-spacing: 0.5px; }
+        .timer-highlight { font-family: "SF Pro Display", sans-serif; font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; margin: 0 3px; }
 
     </style>
 </head>
 <body>
 
 <div id="app" class="day-mode">
-    <div class="celestial-body"></div>
+    <div class="celestial-orbit-container">
+        <div class="celestial-body">
+            <div class="celestial-body-inner"></div>
+        </div>
+    </div>
 
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
+    <div class="clouds-container">
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+    </div>
 
     <div class="bird-container">
-        <svg class="bird-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-           <path d="M468.5,226.8c-6.3-2.3-41-14.6-73.4-14.6c-40.3,0-70.4,18.5-81.5,26.6c-10.8,7.9-32.3,14.8-53,14.8c-14.3,0-27.4-3.2-35.2-7.1
-            c-17.5-8.7-28.2-18.5-32.6-23c-15.4-15.8-24.9-32.2-32.6-45.4c-1.8-3-3.5-5.9-5.2-8.7c-2.9-4.6-32-48.4-64.7-48.4
-            c-34.8,0-49.3,32.4-51.2,37c-4,9.6-4.9,22.5,2,33.7c12.7,20.7,40.1,41.9,47.9,47.7c-2.9,1.1-5.9,2.2-8.8,3.5
-            c-28.7,12.5-42.5,36.8-42.5,37.2c0,0.3-0.1,0.6-0.1,0.9c0,18.6,15,34.5,34.3,36.3c1.8,0.2,3.6,0.3,5.4,0.3
-            c19.3,0,38.1-8.6,51.5-23.5c6.4-7.1,11.6-14.6,16.1-21.9c12.7,4.3,26.6,6.6,41.1,6.6c18.7,0,41.2-3.9,60.6-10.6
-            c34.9-12,72.1-10.8,110.7-9.5c10.4,0.3,20.8,0.7,31.2,0.7c28.4,0,62.3-2.9,82.4-15.8C477.9,242.3,475.6,229.4,468.5,226.8z"/>
+        <svg class="bird-svg bird-large" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
+            <path class="bird-shape" d="M62.7 11.9c-1.6-1.2-4.3-2.1-7.1-2.5 -2.6-0.4-5.4 0.3-8.2 1.2 -3.7 1.2-7.3 3-10.6 5 -0.8 0.5-1.6 1-2.4 1.5 -0.1 0.1-0.3 0.1-0.4 0.1 -0.9 0.3-1.7 0.6-2.6 0.9 -0.7 0.2-1.4 0.5-2.1 0.7 -1.1 0.4-2.1 0.8-3.1 1.2 -1.7 0.7-3.2 1.4-4.6 2.1 -2.7 1.2-4.5 2.2-5.5 2.8 -0.5 0.3-0.8 0.5-1 0.6 -0.6 0.4-1 0.7-1.3 1 -0.6 0.6-1 1.2-1.3 1.7 -0.2 0.3-0.3 0.6-0.4 0.9 -0.2 0.6-0.2 1.1 0 1.6 0.3 0.7 0.9 1.3 1.8 1.6 0.8 0.3 1.9 0.3 2.8 0.1 0.3-0.1 0.6-0.2 0.9-0.3 0.6-0.2 1.2-0.6 1.7-1 0.9-0.8 1.7-1.8 2.4-3 0.6-1.1 1-2.2 1.2-3.4 0.1-0.4 0.1-0.8 0.1-1.2 0-0.3-0.1-0.6-0.2-0.8 -0.2-0.4-0.5-0.7-0.9-1 -0.7-0.5-1.6-0.8-2.7-0.8 -1 0-1.9 0.2-2.7 0.6 -0.1 0-0.1 0.1-0.2 0.1 -0.7 0.4-1.2 1-1.5 1.7 -0.3 0.7-0.3 1.5-0.1 2.2 0.2 0.5 0.4 1 0.8 1.4 0.3 0.4 0.7 0.7 1.2 1 0.7 0.4 1.5 0.5 2.3 0.5 1.2 0 2.3-0.4 3.3-1 0.9-0.6 1.7-1.4 2.3-2.3 1-1.5 1.5-3.3 1.8-5.1 0.4-2.4 0.1-4.8-0.8-7 -0.5-1.2-1.3-2.3-2.2-3.3 -1.5-1.5-3.5-2.5-5.6-3.2 -3.6-1.1-7.4-1.3-11.1-0.7 -2.9 0.5-5.7 1.6-8.2 3.2C3.4 18.6 1.4 21 0.3 23.8 0 24.7-0.1 25.6 0 26.5c0.1 0.7 0.4 1.4 0.9 1.9 0.5 0.5 1.2 0.8 1.9 0.8 1.3 0.1 2.6-0.5 3.4-1.5 0.6-0.8 1-1.8 1.2-2.9 0.2-1.2 0.2-2.5 0-3.7 -0.3-2-1.1-3.8-2.4-5.4 -1.1-1.3-2.5-2.3-4.1-3.1 -0.5-0.2-1-0.4-1.5-0.6 0.5-0.2 1.1-0.5 1.6-0.7 1.7-0.7 3.5-1.2 5.4-1.5 3.5-0.6 7.1-0.4 10.6 0.6 1.9 0.5 3.6 1.3 5.2 2.3 0.6 0.4 1.2 0.8 1.8 1.3 0.4 0.4 0.8 0.7 1.2 1.1 0.2 0.2 0.4 0.4 0.6 0.6 0.2 0.3 0.3 0.5 0.5 0.8 0.3 0.5 0.5 1.1 0.8 1.6 0.5 1.3 0.9 2.7 1.1 4.2 0.1 0.5 0.1 0.9 0.1 1.4 0.1 1.3 0 2.6-0.4 3.8 -0.3 1-0.9 1.9-1.6 2.6 -0.7 0.7-1.6 1.2-2.5 1.4 -1.3 0.4-2.7 0.3-4-0.1 -0.9-0.3-1.8-0.9-2.5-1.6 -0.2-0.3-0.5-0.6-0.6-0.9 -0.1-0.2-0.1-0.3-0.2-0.5 -0.3-0.7-0.4-1.4-0.3-2.2 0.1-1.2 0.6-2.3 1.3-3.2 0.9-1.1 2.1-1.9 3.5-2.3 1.4-0.5 2.9-0.6 4.3-0.4 1.3 0.2 2.5 0.7 3.6 1.5 0.8 0.5 1.4 1.2 1.9 2 0.1 0.2 0.2 0.4 0.3 0.6 0.1 0.2 0.2 0.4 0.3 0.6 0.1 0.3 0.2 0.6 0.2 0.9 0 0.3 0 0.5-0.1 0.8 -0.1 0.4-0.2 0.8-0.4 1.1 -0.3 0.5-0.6 0.9-1 1.2 -0.5 0.4-1.1 0.7-1.7 0.9 -0.9 0.3-1.9 0.4-2.8 0.3 -0.6-0.1-1.2-0.3-1.7-0.6 -0.4-0.2-0.7-0.5-1-0.9 -0.3-0.4-0.5-0.8-0.6-1.3 -0.1-0.6-0.1-1.2 0.1-1.8 0.2-0.8 0.6-1.5 1.2-2.1 0.7-0.7 1.5-1.2 2.5-1.6 1.1-0.4 2.2-0.5 3.4-0.4 1.1 0.1 2.2 0.4 3.2 1 0.8 0.4 1.5 1 2.1 1.7 0.4 0.5 0.8 1 1 1.6 0.1 0.3 0.2 0.6 0.3 0.9 0.1 0.4 0.1 0.9 0.1 1.3 0 1-0.2 2-0.7 2.9 -0.5 1-1.3 1.9-2.2 2.6 -0.9 0.7-1.9 1.2-3 1.5 -0.2 0.1-0.5 0.1-0.7 0.2 -0.4 0.1-0.9 0.1-1.3 0.1 -1 0-2-0.2-2.9-0.6 -0.7-0.3-1.3-0.7-1.9-1.3 -0.6-0.6-1-1.3-1.3-2.1 -0.2-0.6-0.3-1.2-0.3-1.9 0-0.8 0.2-1.7 0.5-2.5 0.3-0.8 0.8-1.5 1.4-2.1 1.1-1.1 2.6-1.8 4.2-2.2 1.7-0.4 3.6-0.4 5.3-0.1 1.7 0.3 3.4 1 4.9 2.1 1 0.7 1.9 1.5 2.7 2.4 0.5 0.6 0.9 1.3 1.3 1.9 0.2 0.4 0.4 0.8 0.5 1.3 0.1 0.4 0.1 0.8 0.1 1.2 0 1.2-0.3 2.3-0.9 3.3 -0.7 1.2-1.7 2.2-2.9 2.9 -1.1 0.7-2.4 1.2-3.8 1.5 -0.6 0.1-1.3 0.2-1.9 0.2 -0.4 0-0.7 0-1.1-0.1 -1.1-0.1-2.2-0.5-3.2-1 -1-0.5-1.8-1.3-2.5-2.2 -0.7-1-1.2-2.2-1.4-3.4 -0.2-0.9-0.2-1.9-0.1-2.8 0.2-1.4 0.7-2.8 1.5-4.1 0.7-1.1 1.5-2.2 2.5-3.1 1.8-1.8 4.1-3 6.6-3.7 3.2-0.8 6.5-0.8 9.8 0 2.9 0.7 5.6 1.9 8.1 3.6 0.4 0.3 0.9 0.6 1.3 0.9 0.5 0.4 0.9 0.7 1.4 1.1 0.4 0.3 0.7 0.6 1.1 1 0.2 0.2 0.4 0.3 0.6 0.5 0.2 0.1 0.3 0.3 0.5 0.4 0.2 0.2 0.4 0.3 0.5 0.5 0.5 0.5 1 1 1.5 1.5 0.6 0.6 1.1 1.3 1.7 1.9 0.8 0.9 1.5 1.9 2.2 2.9 0.2 0.3 0.4 0.5 0.6 0.8 0.2 0.2 0.3 0.4 0.5 0.6 0.4 0.5 0.8 0.9 1.1 1.3 1 1.1 1.9 2.2 2.8 3.3 0.6 0.7 1.2 1.4 1.7 2.1 0.3 0.3 0.5 0.6 0.7 0.8 0.4 0.5 0.8 0.9 1.2 1.3 0.4 0.4 0.7 0.7 1.1 1 0.3 0.3 0.7 0.6 1 0.8 0.6 0.5 1.2 0.9 1.8 1.3 0.4 0.2 0.8 0.4 1.2 0.6 0.6 0.3 1.2 0.5 1.7 0.7 0.7 0.3 1.4 0.5 2.1 0.7 1 0.3 1.9 0.6 2.9 0.8 0.4 0.1 0.9 0.2 1.3 0.3 0.4 0.1 0.8 0.1 1.2 0.2 0.3 0 0.6 0.1 0.9 0.1 0.4 0 0.8 0.1 1.2 0.1 0.6 0 1.1-0.1 1.7-0.2 0.4-0.1 0.8-0.2 1.3-0.4 0.5-0.2 0.9-0.4 1.4-0.7 0.7-0.4 1.3-0.9 1.9-1.5 0.2-0.2 0.4-0.5 0.7-0.7 0.2-0.2 0.3-0.4 0.5-0.6 0.2-0.3 0.4-0.5 0.6-0.8 0.2-0.3 0.4-0.5 0.5-0.8 0.2-0.4 0.4-0.7 0.5-1.1 0.2-0.6 0.3-1.3 0.3-1.9 0-0.8-0.1-1.7-0.4-2.5 -0.1-0.3-0.2-0.7-0.3-1 -0.1-0.3-0.2-0.5-0.3-0.8 -0.2-0.5-0.5-1-0.7-1.5 -0.4-0.7-0.9-1.4-1.4-2.1 -0.8-1.1-1.8-2.1-2.8-3.1 -0.8-0.7-1.5-1.5-2.4-2.1 -0.9-0.7-1.7-1.4-2.7-2.1 -2-1.4-4.2-2.6-6.5-3.6 -1.3-0.6-2.6-1.1-4-1.6C63.4 12 63 12 62.7 11.9z"/>
+        </svg>
+        <svg class="bird-svg bird-small" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path class="bird-shape" d="M31.5 49.3c1.9-2.5 4.3-5.9 4.3-9 0-4.9-6.2-8.9-10.5-11.4 -0.7-0.4-1.4-0.8-2.1-1.2C18 24.5 12.9 21.4 8 18c-0.3-0.2-0.6-0.4-1-0.6 0.6-0.1 1.1-0.3 1.7-0.4 3.2-0.6 6.4 0.2 9.3 1.7 0.4 0.2 0.8 0.4 1.2 0.6 0.2 0.1 0.4 0.2 0.5 0.3 0.2 0.1 0.5 0.3 0.7 0.4 2.3 1.5 4.6 3 6.7 4.6 1 0.8 2 1.5 3 2.3 0.8 0.6 1.6 1.2 2.4 1.8 0.9 0.7 1.8 1.4 2.7 2.1 0.7 0.5 1.4 1.1 2.1 1.6 0.4 0.3 0.8 0.6 1.2 0.9 0.4 0.3 0.9 0.6 1.3 0.9 1 0.7 2 1.3 3.1 1.9 0.6 0.4 1.3 0.7 1.9 1.1 0.4 0.2 0.8 0.4 1.2 0.6 0.3 0.1 0.6 0.3 0.8 0.4 1.2 0.5 2.5 1 3.7 1.4 0.8 0.3 1.6 0.5 2.4 0.7 0.5 0.1 1 0.3 1.6 0.4 0.5 0.1 1 0.2 1.5 0.3 0.7 0.1 1.3 0.2 2 0.3 1 0.1 1.9 0.2 2.9 0.2 0.6 0 1.2 0 1.7-0.1 0.3 0 0.7-0.1 1-0.1 0.2 0 0.3-0.1 0.5-0.1 0.2 0 0.3-0.1 0.5-0.2 0.2-0.1 0.4-0.1 0.6-0.2 0.3-0.1 0.6-0.2 0.9-0.4 0.3-0.1 0.6-0.3 0.8-0.5 0.2-0.1 0.4-0.3 0.5-0.5 0.2-0.2 0.3-0.3 0.5-0.5 0.3-0.4 0.5-0.8 0.7-1.2 0.2-0.4 0.3-0.8 0.4-1.2 0.1-0.6 0.1-1.3 0.1-1.9 0-0.7-0.1-1.3-0.3-2 -0.1-0.3-0.3-0.7-0.4-1 -0.2-0.5-0.4-0.9-0.7-1.4 -0.3-0.6-0.7-1.2-1.2-1.8 -0.5-0.7-1-1.4-1.6-2.1 -1.2-1.5-2.6-2.9-4.1-4.3 -0.8-0.7-1.6-1.4-2.5-2 -0.4-0.3-0.9-0.6-1.3-1 -0.4-0.3-0.8-0.6-1.2-0.9 -1-0.7-2-1.5-3-2.2 -0.7-0.5-1.4-1-2.1-1.4 -0.3-0.2-0.6-0.4-0.9-0.7 -0.1-0.1-0.3-0.2-0.4-0.2 -0.1-0.1-0.3-0.2-0.4-0.3 -0.4-0.3-0.9-0.5-1.3-0.8 -0.8-0.4-1.6-0.8-2.4-1.2 -0.8-0.4-1.7-0.7-2.5-1.1 -1.7-0.7-3.4-1.3-5.2-1.9 -0.8-0.2-1.7-0.5-2.5-0.7 -0.6-0.2-1.1-0.3-1.7-0.4 -0.2-0.1-0.5-0.1-0.7-0.2 -0.6-0.1-1.2-0.2-1.8-0.3 -0.9-0.1-1.9-0.2-2.8-0.2 -0.9 0-1.9 0-2.8 0.1 -0.5 0-1.1 0.1-1.6 0.2 -0.1 0-0.3 0.1-0.4 0.1 -0.6 0.1-1.3 0.3-1.9 0.4 -0.7 0.2-1.4 0.5-2.1 0.7 -0.5 0.2-1 0.4-1.5 0.7 -0.3 0.1-0.6 0.3-0.8 0.4 -0.5 0.3-0.9 0.6-1.4 0.9 -0.7 0.5-1.3 1-1.9 1.5 -0.2 0.2-0.4 0.4-0.6 0.6 -0.2 0.2-0.4 0.5-0.5 0.7 -0.4 0.5-0.7 1-1.1 1.5 -0.5 0.7-0.9 1.4-1.3 2.1 -0.2 0.3-0.3 0.6-0.5 1 -0.1 0.3-0.3 0.6-0.4 0.9 -0.2 0.7-0.3 1.3-0.4 2 0 0.8 0 1.6 0.2 2.4 0.1 0.5 0.2 1 0.4 1.5 0.2 0.5 0.5 1 0.8 1.4 0.5 0.7 1.1 1.4 1.8 2 0.9 0.8 2 1.5 3.1 2.2 0.6 0.4 1.3 0.7 2 1 0.4 0.2 0.8 0.4 1.2 0.5 0.4 0.2 0.8 0.3 1.2 0.4 0.9 0.3 1.8 0.5 2.7 0.6 0.4 0 0.8 0.1 1.1 0.1 0.4 0 0.8 0 1.2 0 1.1-0.1 2.2-0.2 3.3-0.4 0.4-0.1 0.8-0.2 1.2-0.3 0.4-0.1 0.8-0.3 1.2-0.5 0.7-0.3 1.4-0.7 2-1.1 0.3-0.2 0.6-0.5 0.9-0.7 0.2-0.2 0.4-0.5 0.6-0.7 0.2-0.3 0.4-0.6 0.6-0.9 0.2-0.3 0.3-0.6 0.5-1 0.1-0.3 0.3-0.7 0.4-1 0.2-0.7 0.3-1.4 0.4-2.2 0-0.7 0-1.5-0.1-2.2 -0.1-0.4-0.1-0.8-0.3-1.1 -0.1-0.2-0.1-0.4-0.2-0.6 -0.3-0.7-0.7-1.4-1.1-2 -0.4-0.6-1-1.2-1.5-1.7 -0.5-0.5-1.1-1-1.8-1.5 -1.2-0.9-2.6-1.8-3.9-2.7 -0.5-0.3-1-0.6-1.6-0.9 -0.1-0.1-0.2-0.1-0.4-0.2 -0.1-0.1-0.3-0.2-0.4-0.2 -1.6-0.9-3.3-1.9-5-2.9 0.9-0.5 1.7-0.9 2.5-1.3 4.4-2.1 8.5-4.3 12.6-6.5 0.5 1.9 0.7 4.3 0.3 7.1C31.2 46.9 31.3 48.1 31.5 49.3z"/>
         </svg>
     </div>
 
-    <div class="ocean">
-        <div class="wave"></div>
-        <div class="wave"></div>
+    <div class="ocean-wrapper">
+        <div class="waves-container">
+            <div class="wave wave-back"></div>
+            <div class="wave wave-mid"></div>
+            <div class="wave wave-front"></div>
+        </div>
+        <div class="ocean-base"></div>
     </div>
 
     <div class="info-container">
-        <div class="timer-text" id="timer">计算中...</div>
+        <div class="timer-box">
+            <div class="timer-text" id="timer">Loading...</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. 日期配置: 2011年2月16日
-    const START_DATE = new Date('2011-02-16T00:00:00');
+    // 配置时间
+    const START_DATE = new Date('2011-02-16T00:00:00+08:00');
 
     const timerElement = document.getElementById('timer');
     const appElement = document.getElementById('app');
+    const rootElement = document.documentElement;
 
-    // 2. 倒计时更新逻辑
     function updateTimer() {
         const now = new Date();
-
-        // 计算总毫秒差
         const diff = now - START_DATE;
 
-        // 换算单位
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // 渲染文字
-        timerElement.innerHTML = `今天是Bitty飞翔的 <span class="timer-highlight">${days}</span> 天 <span class="timer-highlight">${hours}</span> 小时 <span class="timer-highlight">${minutes}</span> 分 <span class="timer-highlight">${seconds}</span> 秒`;
+        timerElement.innerHTML = `今天是Bitty和伙伴飞翔的<br><span class="timer-highlight">${days}</span> 天 <span class="timer-highlight">${String(hours).padStart(2, '0')}</span> 小时 <span class="timer-highlight">${String(minutes).padStart(2, '0')}</span> 分 <span class="timer-highlight">${String(seconds).padStart(2, '0')}</span> 秒`;
     }
 
-    // 3. 日夜切换逻辑 (基于GMT+8 北京时间)
-    function checkDayNight() {
-        // 获取当前北京时间的时间对象
+    function updateEnvironment() {
         const now = new Date();
-        // 转换为北京时间字符串来判断小时
-        const beijingTimeStr = now.toLocaleString("en-US", {timeZone: "Asia/Shanghai"});
-        const beijingDate = new Date(beijingTimeStr);
-        const currentHour = beijingDate.getHours();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const beijingDate = new Date(utc + (3600000 * 8));
 
-        // 假设 6:00 - 18:00 为白天
-        if (currentHour >= 6 && currentHour < 18) {
+        const currentHour = beijingDate.getHours();
+        const currentMinute = beijingDate.getMinutes();
+
+        const totalMinutes = currentHour * 60 + currentMinute;
+        const totalDayMinutes = 24 * 60;
+        const percentage = totalMinutes / totalDayMinutes;
+
+        const angle = (percentage * 360) - 180;
+        rootElement.style.setProperty('--celestial-angle', `${angle}deg`);
+
+        const isDayTime = currentHour >= 6 && currentHour < 18;
+
+        if (isDayTime) {
             if (appElement.classList.contains('night-mode')) {
                 appElement.classList.remove('night-mode');
                 appElement.classList.add('day-mode');
@@ -283,12 +350,11 @@
         }
     }
 
-    // 初始化
-    setInterval(updateTimer, 1000); // 每秒刷新时间
-    setInterval(checkDayNight, 60000); // 每分钟检查一次日夜模式
-
     updateTimer();
-    checkDayNight();
+    updateEnvironment();
+
+    setInterval(updateTimer, 1000);
+    setInterval(updateEnvironment, 60000);
 
 </script>
 
