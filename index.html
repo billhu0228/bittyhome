@@ -56,19 +56,23 @@
         .day-mode { background: linear-gradient(180deg, var(--sky-day-top) 0%, var(--sky-day-bottom) 100%); }
         .night-mode { background: linear-gradient(180deg, var(--sky-night-top) 0%, var(--sky-night-bottom) 100%); }
 
-        /* --- 1. 天体轨道系统 (摩天轮式旋转) --- */
+        /* --- 1. 天体轨道系统 (摩天轮式旋转) - 修改后的参数 --- */
         .celestial-orbit-container {
             position: absolute;
-            bottom: -20vh; /* 轨道中心下移，形成拱形轨迹 */
+            /* 修改1：调整底部距离，让轨道整体上移 */
+            bottom: -10vh;
             left: 50%;
-            width: 130vh;  /* 轨道直径 */
-            height: 130vh;
-            /* 居中并根据时间旋转 */
-            transform: translate(-50%, 50%) rotate(var(--celestial-angle));
+            /* 修改2：增大轨道直径，确保旋转时能覆盖到屏幕上方 */
+            width: 100vh;
+            height: 100vh;
+            /* 保持不变：居中并根据时间旋转 */
+            transform: translate(-50%, 0) rotate(var(--celestial-angle));
             z-index: 10;
             pointer-events: none;
-            transition: transform 1s linear; /* 平滑转动 */
+            transition: transform 1s linear;
             border-radius: 50%;
+            /* 调试技巧：如果还是看不见，取消下面这行的注释，加上红框看看轨道在哪 */
+            border: 2px solid red; */
         }
 
         /* 通用天体包装器，用于修正自转，保持图标直立 */
