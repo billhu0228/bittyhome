@@ -14,24 +14,25 @@
             --sky-night-bottom: #16233a;
 
             /* 海洋颜色 - 卡通分层风格 */
-            /* 日间 */
-            --ocean-wave-back: #00899b;   /* 后排深色 */
-            --ocean-wave-mid: #00bcd4;    /* 中间色 */
-            --ocean-wave-front: #4dd0e1;  /* 前排浅色 */
-            --ocean-bg-day: #006064;      /* 底部填充 */
+            --ocean-wave-back: #00899b;
+            --ocean-wave-mid: #00bcd4;
+            --ocean-wave-front: #4dd0e1;
+            --ocean-bg-day: #006064;
 
-            /* 夜间 */
+            /* 夜间海洋 */
             --ocean-wave-back-night: #0d47a1;
             --ocean-wave-mid-night: #1565c0;
             --ocean-wave-front-night: #1e88e5;
             --ocean-bg-night: #0a3d91;
 
-            /* 鸟的颜色 */
-            --bird-color-day: #37474f;
-            --bird-color-night: #b0bec5;
+            /* 鸟的颜色 (推特蓝) */
+            --bird-color-day: #1DA1F2;
+            --bird-color-night: #8ecdf8;
 
             --text-color: #ffffff;
-            --celestial-angle: -90deg;
+
+            /* 天体角度变量，由JS动态计算 */
+            --celestial-angle: 0deg;
         }
 
         body, html {
@@ -55,46 +56,62 @@
         .day-mode { background: linear-gradient(180deg, var(--sky-day-top) 0%, var(--sky-day-bottom) 100%); }
         .night-mode { background: linear-gradient(180deg, var(--sky-night-top) 0%, var(--sky-night-bottom) 100%); }
 
-        /* --- 1. 天体轨道系统 --- */
+        /* --- 1. 天体轨道系统 (摩天轮式旋转) --- */
         .celestial-orbit-container {
             position: absolute;
-            bottom: -50vh;
+            bottom: -20vh; /* 轨道中心下移，形成拱形轨迹 */
             left: 50%;
-            width: 150vmax;
-            height: 150vmax;
-            transform-origin: center center;
+            width: 130vh;  /* 轨道直径 */
+            height: 130vh;
+            /* 居中并根据时间旋转 */
             transform: translate(-50%, 50%) rotate(var(--celestial-angle));
             z-index: 10;
             pointer-events: none;
-            transition: transform 1s linear;
+            transition: transform 1s linear; /* 平滑转动 */
+            border-radius: 50%;
         }
 
-        .celestial-body {
+        /* 通用天体包装器，用于修正自转，保持图标直立 */
+        .celestial-wrapper {
             position: absolute;
-            top: 0;
             left: 50%;
-            transform: translate(-50%, -50%);
             width: 80px;
             height: 80px;
+            margin-left: -40px;
+            margin-top: -40px;
+            /* 反向旋转，抵消轨道的旋转，使太阳月亮始终头朝上 */
+            transform: rotate(calc(var(--celestial-angle) * -1));
         }
 
-        .celestial-body-inner {
-             width: 100%;
-             height: 100%;
-             border-radius: 50%;
-             transform: rotate(calc(var(--celestial-angle) * -1));
-             transition: all 2s ease;
-        }
+        /* 太阳位置：0度 (轨道顶部) */
+        .sun-wrapper { top: 0; }
 
-        .day-mode .celestial-body-inner {
+        /* 月亮位置：180度 (轨道底部) */
+        .moon-wrapper { bottom: 0; margin-bottom: -40px; }
+
+        /* 太阳本体 */
+        .the-sun {
+            width: 100%; height: 100%;
+            border-radius: 50%;
             background: #fdd835;
-            box-shadow: 0 0 50px rgba(253, 216, 53, 0.6);
+            box-shadow: 0 0 40px rgba(253, 216, 53, 0.8), 0 0 80px rgba(253, 216, 53, 0.4);
         }
-        .night-mode .celestial-body-inner {
-            background: transparent;
-            box-shadow: -15px 15px 0 2px #fff9c4;
-            transform: rotate(calc(var(--celestial-angle) * -1 - 25deg)) scale(0.9);
+
+        /* 月亮本体 */
+        .the-moon {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: #f4f6f0;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
         }
+        /* 月球陨石坑 */
+        .crater { position: absolute; background: #e0e0e0; border-radius: 50%; opacity: 0.6; }
+        .cr1 { width: 22px; height: 22px; top: 18px; left: 45px; }
+        .cr2 { width: 12px; height: 12px; top: 48px; left: 20px; }
+        .cr3 { width: 16px; height: 16px; top: 52px; left: 50px; }
+
 
         /* --- 云朵 --- */
         .clouds-container { position: absolute; width: 100%; height: 60%; z-index: 5; pointer-events: none;}
@@ -108,7 +125,7 @@
         .c3::after { width: 70px; height: 70px; top: -35px; left: 25px; } .c3::before { width: 60px; height: 60px; top: -25px; left: 60px; }
         @keyframes moveLeft { 100% { transform: translateX(-180vw); } }
 
-        /* --- 2. 双鸟比翼双飞 --- */
+        /* --- 2. 双鸟比翼双飞 (Twitter风格) --- */
         .bird-container {
             position: absolute;
             top: 40%;
@@ -129,118 +146,51 @@
         .day-mode .bird-shape { fill: var(--bird-color-day); }
         .night-mode .bird-shape { fill: var(--bird-color-night); }
 
-        .bird-large { width: 80px; top: 0; left: 0; z-index: 2; }
-        .bird-small { width: 50px; top: 20px; left: -45px; z-index: 1; opacity: 0.95; animation: sub-glide 5s ease-in-out infinite -0.8s; }
+        .bird-large { width: 60px; top: 0; left: 0; z-index: 2; }
+        .bird-small { width: 40px; top: 15px; left: -35px; z-index: 1; opacity: 0.95; animation: sub-glide 5s ease-in-out infinite -0.8s; }
 
         @keyframes group-glide {
-            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
-            50% { transform: translate(-50%, -50%) translateY(-15px) rotate(1.5deg); }
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(-2deg); }
+            50% { transform: translate(-50%, -50%) translateY(-15px) rotate(0deg); }
         }
         @keyframes sub-glide {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(8px) rotate(-1deg); }
         }
 
-        /* --- 3. 无缝卡通海浪 (核心修改) --- */
+        /* --- 3. 无缝卡通海浪 --- */
         .ocean-wrapper {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40vh; /* 增加波浪区域高度 */
-            z-index: 15;
-            overflow: hidden;
-            pointer-events: none;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40vh; z-index: 15; overflow: hidden; pointer-events: none;
         }
-
-        /* 填充底部的颜色块，防止波浪起伏时露出背景 */
         .ocean-base {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 20vh;
-            background-color: var(--ocean-bg-day);
-            transition: background-color 3s ease;
-            z-index: 0;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 20vh; background-color: var(--ocean-bg-day); transition: background-color 3s ease; z-index: 0;
         }
         .night-mode .ocean-base { background-color: var(--ocean-bg-night); }
 
-        .waves-container {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+        .waves-container { position: absolute; bottom: 0; width: 100%; height: 100%; z-index: 1; }
 
         .wave {
-            position: absolute;
-            left: 0;
-            width: 200%; /* 关键：宽度为200%，包含两个完整的波浪周期 */
-            background-repeat: repeat-x;
-            background-position: 0 bottom;
-            transition: background-color 3s ease;
-            /* 使用Mask来实现波浪形状，方便通过背景色改变颜色 */
-            -webkit-mask-repeat: repeat-x;
-            mask-repeat: repeat-x;
-            /* 修正Mask尺寸：50% 100% 意味着在200%的宽度里重复两次，刚好接上 */
-            -webkit-mask-size: 50% 100%;
-            mask-size: 50% 100%;
+            position: absolute; left: 0; width: 200%; background-repeat: repeat-x; background-position: 0 bottom; transition: background-color 3s ease;
+            -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x; -webkit-mask-size: 50% 100%; mask-size: 50% 100%;
             -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300' preserveAspectRatio='none'%3E%3Cpath d='M0,100 C250,200 500,0 750,100 S1000,100 1000,100 V300 H0 Z' fill='black'/%3E%3C/svg%3E");
             mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300' preserveAspectRatio='none'%3E%3Cpath d='M0,100 C250,200 500,0 750,100 S1000,100 1000,100 V300 H0 Z' fill='black'/%3E%3C/svg%3E");
         }
 
-        /* 统一的流动动画：从 0% 移动到 -50% (即移动半个身位，刚好回到原点形状) */
-        @keyframes wave-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+        @keyframes wave-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* 后排波浪 */
-        .wave-back {
-            bottom: 12vh;
-            height: 20vh;
-            z-index: 1;
-            opacity: 1;
-            background-color: var(--ocean-wave-back);
-            animation: wave-scroll 25s linear infinite;
-        }
+        .wave-back { bottom: 12vh; height: 20vh; z-index: 1; background-color: var(--ocean-wave-back); animation: wave-scroll 25s linear infinite; }
         .night-mode .wave-back { background-color: var(--ocean-wave-back-night); }
 
-        /* 中间波浪 */
-        .wave-mid {
-            bottom: 6vh;
-            height: 22vh;
-            z-index: 2;
-            opacity: 1;
-            background-color: var(--ocean-wave-mid);
-            /* 反向流动增加层次感，但要处理好起始点，这里使用正向但不同速度更稳妥 */
-            animation: wave-scroll 18s linear infinite;
-            /* 稍微错位 */
-            left: -20px;
-        }
+        .wave-mid { bottom: 6vh; height: 22vh; z-index: 2; background-color: var(--ocean-wave-mid); animation: wave-scroll 18s linear infinite; left: -20px; }
         .night-mode .wave-mid { background-color: var(--ocean-wave-mid-night); }
 
-        /* 前排波浪 */
-        .wave-front {
-            bottom: -2vh;
-            height: 25vh;
-            z-index: 3;
-            opacity: 1;
-            background-color: var(--ocean-wave-front);
-            animation: wave-scroll 10s linear infinite;
-        }
+        .wave-front { bottom: -2vh; height: 25vh; z-index: 3; background-color: var(--ocean-wave-front); animation: wave-scroll 10s linear infinite; }
         .night-mode .wave-front { background-color: var(--ocean-wave-front-night); }
 
 
         /* --- 文字信息 --- */
         .info-container {
-            position: absolute;
-            bottom: 12vh;
-            width: 100%;
-            text-align: center;
-            z-index: 30;
+            position: absolute; bottom: 12vh; width: 100%; text-align: center; z-index: 30;
         }
 
         .timer-box {
@@ -263,9 +213,17 @@
 <body>
 
 <div id="app" class="day-mode">
+
     <div class="celestial-orbit-container">
-        <div class="celestial-body">
-            <div class="celestial-body-inner"></div>
+        <div class="celestial-wrapper sun-wrapper" id="sunWrapper">
+            <div class="the-sun"></div>
+        </div>
+        <div class="celestial-wrapper moon-wrapper" id="moonWrapper">
+            <div class="the-moon">
+                <div class="crater cr1"></div>
+                <div class="crater cr2"></div>
+                <div class="crater cr3"></div>
+            </div>
         </div>
     </div>
 
@@ -279,7 +237,6 @@
         <svg class="bird-svg bird-large" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path class="bird-shape" d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/>
         </svg>
-
         <svg class="bird-svg bird-small" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path class="bird-shape" d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/>
         </svg>
@@ -302,13 +259,14 @@
 </div>
 
 <script>
-    // 配置时间
+    // 配置起始日期
     const START_DATE = new Date('2011-02-16T00:00:00+08:00');
 
     const timerElement = document.getElementById('timer');
     const appElement = document.getElementById('app');
     const rootElement = document.documentElement;
 
+    // 更新计时器文字
     function updateTimer() {
         const now = new Date();
         const diff = now - START_DATE;
@@ -321,21 +279,35 @@
         timerElement.innerHTML = `今天是Bitty飞翔的<br><span class="timer-highlight">${days}</span> 天 <span class="timer-highlight">${String(hours).padStart(2, '0')}</span> 小时 <span class="timer-highlight">${String(minutes).padStart(2, '0')}</span> 分 <span class="timer-highlight">${String(seconds).padStart(2, '0')}</span> 秒`;
     }
 
+    // 获取北京时间 (UTC+8)
+    function getBeijingTime() {
+        const d = new Date();
+        const localTime = d.getTime();
+        const localOffset = d.getTimezoneOffset() * 60000;
+        const utc = localTime + localOffset;
+        const offset = 8; // UTC+8
+        return new Date(utc + (3600000 * offset));
+    }
+
+    // 更新环境 (太阳月亮位置 + 背景色)
     function updateEnvironment() {
-        const now = new Date();
-        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        const beijingDate = new Date(utc + (3600000 * 8));
+        const beijingDate = getBeijingTime();
 
         const currentHour = beijingDate.getHours();
         const currentMinute = beijingDate.getMinutes();
 
+        // 当天总分钟数
         const totalMinutes = currentHour * 60 + currentMinute;
-        const totalDayMinutes = 24 * 60;
-        const percentage = totalMinutes / totalDayMinutes;
 
-        const angle = (percentage * 360) - 180;
+        // 角度计算:
+        // 12:00 (720分) = 0度
+        // (当前分钟 - 720) * 0.25度/分
+        const angle = (totalMinutes - 720) * 0.25;
+
+        // 设置CSS变量旋转轨道
         rootElement.style.setProperty('--celestial-angle', `${angle}deg`);
 
+        // 判断白天/黑夜 (北京时间 6:00 - 18:00 为白天)
         const isDayTime = currentHour >= 6 && currentHour < 18;
 
         if (isDayTime) {
@@ -351,11 +323,13 @@
         }
     }
 
+    // 初始化
     updateTimer();
     updateEnvironment();
 
+    // 循环执行
     setInterval(updateTimer, 1000);
-    setInterval(updateEnvironment, 60000);
+    setInterval(updateEnvironment, 60000); // 每分钟更新一次太阳位置
 
 </script>
 
